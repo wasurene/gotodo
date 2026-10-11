@@ -1,5 +1,55 @@
 package main
 
-// func readTask([]Task, error) {
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+)
 
-// }
+func writeTasks(tasks []Task, fileName string) error {
+	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Printf("Ошибка: %v", err)
+		return err
+	}
+
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+
+	err = encoder.Encode(tasks)
+	if err != nil {
+		fmt.Printf("Ошибка при сохранении в json: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func readTasks(fileName string) ([]Task, error) {
+	file, err := os.OpenFile(fileName, os.O_RDONLY, 0644)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return []Task{}, nil
+		}
+		fmt.Printf("Ошибка: %v", err)
+		return nil, err
+	}
+
+	defer file.Close()
+
+	var tasks []Task
+
+	err = json.NewDecoder(file).Decode(&tasks)
+	if err != nil {
+		if err == io.EOF {
+			return []Task{}, nil
+		}
+		fmt.Printf("Ошибка: %v", err)
+		return nil, err
+	}
+
+	return tasks, nil
+}
