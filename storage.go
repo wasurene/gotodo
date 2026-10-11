@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 func writeTasks(tasks []Task, fileName string) error {
@@ -52,4 +53,21 @@ func readTasks(fileName string) ([]Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func getTasksPath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Printf("Ошибка: %v", err)
+		return "", err
+	}
+	dir := filepath.Join(homeDir, ".gotodo")
+	err = os.MkdirAll(dir, 0755)
+	if err != nil {
+		fmt.Printf("Ошибка при создании файла: %v", err)
+		return "", err
+	}
+	path := filepath.Join(dir, "tasks.json")
+
+	return path, nil
 }
