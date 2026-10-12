@@ -5,6 +5,8 @@ import (
 	"os"
 	"slices"
 	"strconv"
+
+	"github.com/fatih/color"
 )
 
 func main() {
@@ -42,12 +44,14 @@ func main() {
 		tasks = append(tasks, newTask)
 
 	case "list":
+		green := color.GreenString("[X] ")
+		red := color.RedString("[] ")
 		fmt.Println("ID", "TEXT", "DONE", "PRIORITY", "DUE")
 		for _, task := range tasks {
 			if task.Done == true {
-				fmt.Println("[X]", task.ID, "|", task.Text, "|", task.Priority, "|", task.Due)
+				fmt.Print(green, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
 			} else {
-				fmt.Println("[]", task.ID, "|", task.Text, "|", task.Priority, "|", task.Due)
+				fmt.Print(red, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
 			}
 		}
 	case "done":
