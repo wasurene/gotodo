@@ -8,11 +8,19 @@ import (
 )
 
 func main() {
-	tasks := []Task{}
-	maxId := 0
+	path, err := getTasksPath()
+	if err != nil {
+		fmt.Printf("Ошибка: %v", err)
+	}
+
+	tasks, err := readTasks(path)
+	if err != nil {
+		fmt.Printf("Ошибка: %v", err)
+	}
 
 	switch os.Args[1] {
 	case "add":
+		maxId := 0
 		if len(os.Args) < 3 {
 			fmt.Println("Введите команду")
 			os.Exit(1)
@@ -61,13 +69,20 @@ func main() {
 		}
 
 	case "rm":
+		completed := false
 		id, err := strconv.Atoi(os.Args[2])
 		if err != nil {
 			fmt.Printf("Ошибка: %v", err)
 		}
 		tasks = slices.DeleteFunc(tasks, func(t Task) bool {
+			completed = true
 			return t.ID == id
 		})
+		if completed {
+			fmt.Printf("Задача %d удалена", id)
+		} else {
+			fmt.Printf("Задача %v не найдена", id)
+		}
 
 	case "clear":
 		tasks = []Task{}
@@ -76,4 +91,8 @@ func main() {
 		fmt.Println("Введите команду: add, list, done, rm, clear")
 	}
 
+	err = writeTasks(tasks, path)
+	if err != nil {
+		fmt.Printf("Ошибка: %v", err)
+	}
 }
