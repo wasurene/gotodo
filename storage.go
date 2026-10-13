@@ -16,7 +16,12 @@ func writeTasks(tasks []Task, fileName string) error {
 		return err
 	}
 
-	defer file.Close()
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("Ошибка: %v", err)
+		}
+	}()
 
 	encoder := json.NewEncoder(file)
 
@@ -39,7 +44,12 @@ func readTasks(fileName string) ([]Task, error) {
 		return nil, err
 	}
 
-	defer file.Close()
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("Ошибка: %v", err)
+		}
+	}()
 
 	var tasks []Task
 

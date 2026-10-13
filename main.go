@@ -33,7 +33,10 @@ func main() {
 		addCmd := flag.NewFlagSet("add", flag.ExitOnError)
 		addPriority := addCmd.String("priority", "низкий", "назначение приоритета")
 		addDue := addCmd.String("due", "-", "назначить дедлайн")
-		addCmd.Parse(os.Args[3:])
+		err := addCmd.Parse(os.Args[3:])
+		if err != nil {
+			fmt.Printf("Ошибка: %v", err)
+		}
 
 		for i := range tasks {
 			if tasks[i].ID > maxId {
@@ -59,27 +62,30 @@ func main() {
 
 		listCmd := flag.NewFlagSet("list", flag.ExitOnError)
 		listFilter := listCmd.String("filter", "", "фильтр выполнено/не выполнено")
-		listCmd.Parse(os.Args[2:])
+		err := listCmd.Parse(os.Args[2:])
+		if err != nil {
+			fmt.Printf("Ошибка: %v", err)
+		}
 
 		switch strings.ToLower(*listFilter) {
 		case "done":
 			fmt.Println("   ID", "TEXT", "PRIORITY", "DUE")
 			for _, task := range tasks {
-				if task.Done == true {
+				if task.Done {
 					fmt.Print(green, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
 				}
 			}
 		case "active":
 			fmt.Println("   ID", "TEXT", "PRIORITY", "DUE")
 			for _, task := range tasks {
-				if task.Done == false {
+				if !task.Done {
 					fmt.Print(red, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
 				}
 			}
 		default:
 			fmt.Println("   ID", "TEXT", "PRIORITY", "DUE")
 			for _, task := range tasks {
-				if task.Done == true {
+				if task.Done {
 					fmt.Print(green, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
 				} else {
 					fmt.Print(red, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
