@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -27,6 +29,12 @@ func main() {
 			fmt.Println("Введите команду")
 			os.Exit(1)
 		}
+
+		addCmd := flag.NewFlagSet("add", flag.ExitOnError)
+		addPriority := addCmd.String("priority", "низкий", "назначение приоритета")
+		addDue := addCmd.String("due", "-", "назначить дедлайн")
+		addCmd.Parse(os.Args[3:])
+
 		for i := range tasks {
 			if tasks[i].ID > maxId {
 				maxId = tasks[i].ID
@@ -40,20 +48,45 @@ func main() {
 			Priority: "",
 			Due:      "",
 		}
+		newTask.Priority = *addPriority
+		newTask.Due = *addDue
 
 		tasks = append(tasks, newTask)
 
 	case "list":
 		green := color.GreenString("[X] ")
 		red := color.RedString("[] ")
-		fmt.Println("ID", "TEXT", "DONE", "PRIORITY", "DUE")
-		for _, task := range tasks {
-			if task.Done == true {
-				fmt.Print(green, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
-			} else {
-				fmt.Print(red, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
+
+		listCmd := flag.NewFlagSet("list", flag.ExitOnError)
+		listFilter := listCmd.String("filter", "", "фильтр выполнено/не выполнено")
+		listCmd.Parse(os.Args[2:])
+
+		switch strings.ToLower(*listFilter) {
+		case "done":
+			fmt.Println("   ID", "TEXT", "PRIORITY", "DUE")
+			for _, task := range tasks {
+				if task.Done == true {
+					fmt.Print(green, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
+				}
+			}
+		case "active":
+			fmt.Println("   ID", "TEXT", "PRIORITY", "DUE")
+			for _, task := range tasks {
+				if task.Done == false {
+					fmt.Print(red, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
+				}
+			}
+		default:
+			fmt.Println("   ID", "TEXT", "PRIORITY", "DUE")
+			for _, task := range tasks {
+				if task.Done == true {
+					fmt.Print(green, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
+				} else {
+					fmt.Print(red, task.ID, "|", task.Text, "|", task.Priority, "|", task.Due, "\n")
+				}
 			}
 		}
+		return
 	case "done":
 		completed := false
 		id, err := strconv.Atoi(os.Args[2])
